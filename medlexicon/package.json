@@ -1,0 +1,26 @@
+{
+  "name": "medlexicon",
+  "version": "1.0.0",
+  "description": "English-Tamil Medical Dictionary API",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "medical-dictionary",
+    "english-tamil",
+    "healthcare"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
