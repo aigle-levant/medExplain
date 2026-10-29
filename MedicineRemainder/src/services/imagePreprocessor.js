@@ -1,4 +1,10 @@
-import sharp from 'sharp';
+let sharp = null;
+try {
+  const mod = await import('sharp');
+  sharp = mod.default;
+} catch {
+  // Sharp not installed; fallback buffer will be used
+}
 
 /**
  * Preprocesses an image buffer using Sharp to dramatically improve Tesseract OCR accuracy:
@@ -11,6 +17,9 @@ import sharp from 'sharp';
  * @returns {Promise<Buffer>} Preprocessed high-contrast PNG buffer
  */
 export const preprocessImageForOcr = async (inputBuffer) => {
+  if (!sharp) {
+    return inputBuffer;
+  }
   try {
     const metadata = await sharp(inputBuffer).metadata();
     
@@ -56,27 +65,30 @@ export const preprocessImageForOcr = async (inputBuffer) => {
  * @returns {Promise<Buffer>} Cropped, de-identified image containing only the medicine section
  */
 export const cropPatientDetails = async (inputBuffer, topFractionToCrop = 0.28) => {
+  if (!sharp) {
+    return inputBuffer;
+  }
   try {
     const metadata = await sharp(inputBuffer).metadata();
-    const height = metadata.height || 1000;
-    const width = metadata.width || 800;
+    const width = metadata.width || 1200;
+    const height = metadata.height || 1600;
 
-    const topOffset = Math.floor(height * topFractionToCrop);
-    const remainingHeight = height - topOffset;
+    const cropTop = Math.floor(height * topFractionToCrop);
+    const croppedHeight = height - cropTop;
 
     const croppedBuffer = await sharp(inputBuffer)
       .extract({
         left: 0,
-        top: topOffset,
+        top: cropTop,
         width: width,
-        height: remainingHeight
+        height: croppedHeight
       })
       .png()
       .toBuffer();
 
     return croppedBuffer;
-  } catch (err) {
-    console.warn('Patient cropping warning (using original buffer):', err.message);
+  } catch (error) {
+    console.warn('Privacy cropping warning (transmitting original buffer):', error.message);
     return inputBuffer;
   }
 };
