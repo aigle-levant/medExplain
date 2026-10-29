@@ -6,3 +6,10 @@ dist/
 uploads/
 *.log
 .DS_Store
+MedicineRemainder/node_modules/
+medlexicon/node_modules/
+medex-mobile/node_modules/
+medex-mobile/.expo/
+medex-mobile/android/.gradle/
+medex-mobile/android/app/build/
+medex-mobile/android/build/
