@@ -3,6 +3,8 @@ import { SAMPLE_PRESCRIPTIONS, SAMPLE_REPORTS } from '../data/mockData';
 
 const KEYS = {
   SETTINGS: '@medex_settings',
+  PROFILE: '@medex_user_profile',
+  PREFERENCES: '@medex_user_preferences',
   MEAL_TIMINGS: '@medex_meal_timings',
   REPORTS: '@medex_reports',
   PRESCRIPTIONS: '@medex_prescriptions',
@@ -10,23 +12,78 @@ const KEYS = {
   CHECKUPS: '@medex_checkups',
 };
 
-const DEFAULT_SETTINGS = {
-  groqApiKey: '',
-  groqModel: 'openai/gpt-oss-20b',
-  geminiApiKey: '',
-  backendUrl: 'http://10.0.2.2:3000', // standard Android emulator host IP
-  preferredLanguage: 'both', // 'en', 'ta', 'both'
-  useDirectAi: true
+const DEFAULT_PROFILE = {
+  name: 'Arun Kumar',
+  email: 'arun.kumar@gmail.com',
+  phone: '+91 98401 23456',
+  bloodGroup: 'O+',
+  age: '38',
+  gender: 'Male',
+  emergencyContactName: 'Kavitha (Spouse)',
+  emergencyContactPhone: '+91 98401 65432'
 };
 
-const DEFAULT_MEAL_TIMINGS = {
+const DEFAULT_PREFERENCES = {
+  language: 'both', // 'en', 'ta', 'both'
+  doseReminders: true,
+  appointmentAlerts: true,
+  soundVibration: true,
+  darkMode: false,
+  biometricLock: false,
   breakfastTime: '08:30',
   lunchTime: '13:00',
   dinnerTime: '20:30',
   timeZone: 'Asia/Kolkata'
 };
 
+const DEFAULT_SETTINGS = {
+  backendUrl: 'http://10.0.2.2:3000',
+  preferredLanguage: 'both'
+};
+
 export const storageService = {
+  async getUserProfile() {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.PROFILE);
+      return data ? { ...DEFAULT_PROFILE, ...JSON.parse(data) } : DEFAULT_PROFILE;
+    } catch {
+      return DEFAULT_PROFILE;
+    }
+  },
+
+  async saveUserProfile(profile) {
+    try {
+      const current = await this.getUserProfile();
+      const updated = { ...current, ...profile };
+      await AsyncStorage.setItem(KEYS.PROFILE, JSON.stringify(updated));
+      return updated;
+    } catch (e) {
+      console.error('Error saving user profile', e);
+      return null;
+    }
+  },
+
+  async getUserPreferences() {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.PREFERENCES);
+      return data ? { ...DEFAULT_PREFERENCES, ...JSON.parse(data) } : DEFAULT_PREFERENCES;
+    } catch {
+      return DEFAULT_PREFERENCES;
+    }
+  },
+
+  async saveUserPreferences(prefs) {
+    try {
+      const current = await this.getUserPreferences();
+      const updated = { ...current, ...prefs };
+      await AsyncStorage.setItem(KEYS.PREFERENCES, JSON.stringify(updated));
+      return updated;
+    } catch (e) {
+      console.error('Error saving user preferences', e);
+      return null;
+    }
+  },
+
   async getSettings() {
     try {
       const data = await AsyncStorage.getItem(KEYS.SETTINGS);
@@ -50,30 +107,31 @@ export const storageService = {
 
   async getMealTimings() {
     try {
-      const data = await AsyncStorage.getItem(KEYS.MEAL_TIMINGS);
-      return data ? { ...DEFAULT_MEAL_TIMINGS, ...JSON.parse(data) } : DEFAULT_MEAL_TIMINGS;
+      const prefs = await this.getUserPreferences();
+      return {
+        breakfastTime: prefs.breakfastTime || '08:30',
+        lunchTime: prefs.lunchTime || '13:00',
+        dinnerTime: prefs.dinnerTime || '20:30',
+        timeZone: prefs.timeZone || 'Asia/Kolkata'
+      };
     } catch {
-      return DEFAULT_MEAL_TIMINGS;
+      return {
+        breakfastTime: '08:30',
+        lunchTime: '13:00',
+        dinnerTime: '20:30',
+        timeZone: 'Asia/Kolkata'
+      };
     }
   },
 
   async saveMealTimings(timings) {
-    try {
-      const current = await this.getMealTimings();
-      const updated = { ...current, ...timings };
-      await AsyncStorage.setItem(KEYS.MEAL_TIMINGS, JSON.stringify(updated));
-      return updated;
-    } catch (e) {
-      console.error('Error saving meal timings', e);
-      return null;
-    }
+    return this.saveUserPreferences(timings);
   },
 
   async getPrescriptions() {
     try {
       const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
       if (data) return JSON.parse(data);
-      // Initialize with sample prescription if first run
       await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(SAMPLE_PRESCRIPTIONS));
       return SAMPLE_PRESCRIPTIONS;
     } catch {
@@ -148,6 +206,17 @@ export const storageService = {
     } catch (e) {
       console.error('Error saving report', e);
       return [];
+    }
+  },
+
+  async clearReportsAndHistory() {
+    try {
+      await AsyncStorage.removeItem(KEYS.REPORTS);
+      await AsyncStorage.removeItem(KEYS.DOSE_HISTORY);
+      return true;
+    } catch (e) {
+      console.error('Error clearing data', e);
+      return false;
     }
   },
 
