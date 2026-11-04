@@ -9,6 +9,7 @@ import { MedExplainScreen } from './src/screens/MedExplainScreen';
 import { MedRemindScreen } from './src/screens/MedRemindScreen';
 import { MedLexiconScreen } from './src/screens/MedLexiconScreen';
 import { HospitalsScreen } from './src/screens/HospitalsScreen';
+import { InsuranceScreen } from './src/screens/InsuranceScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 
 const TABS = [
@@ -17,6 +18,7 @@ const TABS = [
   { id: 'remind', label: 'Medicines', icon: 'medkit-outline', active: 'medkit' },
   { id: 'lexicon', label: 'Library', icon: 'book-outline', active: 'book' },
   { id: 'hospitals', label: 'Care', icon: 'location-outline', active: 'location' },
+  { id: 'insurance', label: 'Insurance', icon: 'shield-checkmark-outline', active: 'shield-checkmark' },
   { id: 'settings', label: 'Profile', icon: 'person-outline', active: 'person' },
 ];
 
@@ -28,6 +30,7 @@ export default function App() {
     remind: <MedRemindScreen />,
     lexicon: <MedLexiconScreen />,
     hospitals: <HospitalsScreen />,
+    insurance: <InsuranceScreen />,
     settings: <SettingsScreen />,
   };
 
